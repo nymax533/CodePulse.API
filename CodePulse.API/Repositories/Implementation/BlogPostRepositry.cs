@@ -5,7 +5,7 @@ using CodePulse.API.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 namespace CodePulse.API.Repositories.Implementation
 {
-    public class BlogPostRepositry : IRepository<BlogPost>
+    public class BlogPostRepositry : IBlogPostRepository<BlogPost>
     {
         private readonly ApplicationDbContext _dbContext;
         public BlogPostRepositry(ApplicationDbContext dbContext)
@@ -52,6 +52,10 @@ namespace CodePulse.API.Repositories.Implementation
 
             return blogPost;
         }
-
+        public async Task<BlogPost> GetByUrlHandleAsync(string urlHandle)
+        {
+            return await _dbContext.BlogPosts.Include(x => x.Categories)
+                .FirstOrDefaultAsync(x => x.UrlHandle == urlHandle);
+        }
     }
 }

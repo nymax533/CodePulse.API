@@ -1,6 +1,7 @@
 ﻿using CodePulse.API.Models.Domain;
 using CodePulse.API.Repositories.Interface;
 using CodePulse.API.Data;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace CodePulse.API.Repositories.Implementation
 {

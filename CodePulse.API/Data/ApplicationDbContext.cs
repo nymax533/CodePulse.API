@@ -2,7 +2,7 @@
 using CodePulse.API.Models.Domain;
 namespace CodePulse.API.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : DbContext 
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

@@ -2,6 +2,7 @@
 using CodePulse.API.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using CodePulse.API.Repositories.Interface;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CodePulse.API.Controllers
 {
@@ -9,10 +10,10 @@ namespace CodePulse.API.Controllers
     [Route("api/[controller]")]
     public class BlogPostsController : Controller
     {
-        private readonly IRepository<BlogPost> _blogPostRepository;
+        private readonly IBlogPostRepository<BlogPost> _blogPostRepository;
         private readonly IRepository<Category> _categoryRepository;
         public BlogPostsController(
-            IRepository<BlogPost> blogPostRepository,
+            IBlogPostRepository<BlogPost> blogPostRepository,
             IRepository<Category> categoryRepositry)
         {
             _blogPostRepository = blogPostRepository;
@@ -20,6 +21,7 @@ namespace CodePulse.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> CreateBlogPost(CreateBlogPostDto request)
         {
             var blogPost = new BlogPost
@@ -122,8 +124,39 @@ namespace CodePulse.API.Controllers
             };
             return Ok(response);
         }
+        [HttpGet]
+        [Route("{urlHandle}")]
+        public async Task<IActionResult> GetBlogPostByUrlHandle([FromRoute]string urlHandle)
+        {
+            var blogPost = await _blogPostRepository.GetByUrlHandleAsync(urlHandle);
+            if (blogPost == null)
+            {
+                return NotFound();
+            }
+            var response = new BlogPostDto
+            {
+                Id = blogPost.Id,
+                Title = blogPost.Title,
+                ShortDescription = blogPost.ShortDescription,
+                Content = blogPost.Content,
+                FeaturedImageUrl = blogPost.FeaturedImageUrl,
+                UrlHandle = blogPost.UrlHandle,
+                PublishedDate = blogPost.PublishedDate,
+                Author = blogPost.Author,
+                IsVisible = blogPost.IsVisible,
+                Categories = blogPost.Categories.Select(c => new CategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    UrlHandle = c.UrlHandle
+                }).ToList()
+            };
+            return Ok(response);
+        }
+
         [HttpPut]
         [Route("{id:guid}")]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> UpdateBlogPostById( Guid id,  UpdateBlogPostDto request)
         {
             var blogPost = new BlogPost
@@ -174,7 +207,7 @@ namespace CodePulse.API.Controllers
             return Ok(response);
         }
         [HttpDelete ("{id:guid}")]
-
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> DeleteBlogPostById(Guid id)
         {
             var blogPost = await _blogPostRepository.DeleteAsync(id);
